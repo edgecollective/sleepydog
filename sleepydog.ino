@@ -9,7 +9,7 @@ void setup() {
 
 }
 
-void loop() {a
+void loop() {
   // put your main code here, to run repeatedly:
 
   digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
