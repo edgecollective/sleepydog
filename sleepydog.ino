@@ -17,7 +17,7 @@ void loop() {
   digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
   delay(1000);   
 
-  sleep(3000);
+  deepsleep(3000); // low-power sleep for 3 seconds
 
   for (int i=0;i<2;i++) {
   digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
@@ -125,7 +125,7 @@ void WDT_Handler(void) {
     WDT->INTFLAG.bit.EW  = 1;        // Clear interrupt flag
 }
 
-int sleep(int maxPeriodMS) {
+int deepsleep(int maxPeriodMS) {
 
     int actualPeriodMS = enable(maxPeriodMS, true); // true = for sleep
 
