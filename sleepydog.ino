@@ -43,11 +43,6 @@ int enable(int maxPeriodMS, bool isForSleep) {
     WDT->CTRL.reg = 0; // Disable watchdog for config
     while(WDT->STATUS.bit.SYNCBUSY);
 
-    // You'll see some occasional conversion here compensating between
-    // milliseconds (1000 Hz) and WDT clock cycles (~1024 Hz).  The low-
-    // power oscillator used by the WDT ostensibly runs at 32,768 Hz with
-    // a 1:32 prescale, thus 1024 Hz, though probably not super precise.
-
     if((maxPeriodMS >= 16000) || !maxPeriodMS) {
         cycles = 16384;
         bits   = 0xB;
@@ -88,28 +83,6 @@ int enable(int maxPeriodMS, bool isForSleep) {
             bits   = 0x0;
         }
     }
-
-    // Watchdog timer on SAMD is a slightly different animal than on AVR.
-    // On AVR, the WTD timeout is configured in one register and then an
-    // interrupt can optionally be enabled to handle the timeout in code
-    // (as in waking from sleep) vs resetting the chip.  Easy.
-    // On SAMD, when the WDT fires, that's it, the chip's getting reset.
-    // Instead, it has an "early warning interrupt" with a different set
-    // interval prior to the reset.  For equivalent behavior to the AVR
-    // library, this requires a slightly different configuration depending
-    // whether we're coming from the sleep() function (which needs the
-    // interrupt), or just enable() (no interrupt, we want the chip reset
-    // unless the WDT is cleared first).  In the sleep case, 'windowed'
-    // mode is used in order to allow access to the longest available
-    // sleep interval (about 16 sec); the WDT 'period' (when a reset
-    // occurs) follows this and is always just set to the max, since the
-    // interrupt will trigger first.  In the enable case, windowed mode
-    // is not used, the WDT period is set and that's that.
-    // The 'isForSleep' argument determines which behavior is used;
-    // this isn't present in the AVR code, just here.  It defaults to
-    // 'false' so existing Arduino code works as normal, while the sleep()
-    // function (later in this file) explicitly passes 'true' to get the
-    // alternate behavior.
 
     if(isForSleep) {
         WDT->INTENSET.bit.EW   = 1;      // Enable early warning interrupt
@@ -190,9 +163,4 @@ void _initialize_wdt() {
 
     _initialized = true;
 }
-
-
-
-
-
 
